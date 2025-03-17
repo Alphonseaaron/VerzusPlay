@@ -1,6 +1,8 @@
 import { Chess, type Square } from 'chess.js';
 import { ref, onValue, set } from 'firebase/database';
 import { rtdb } from './firebase';
+import { GameHistoryManager } from './game-history';
+import { calculateEloChange, getNewRating } from './elo';
 import type { Player } from './store';
 
 export interface GameState {
@@ -15,6 +17,7 @@ export interface GameState {
     white: Player | null;
     black: Player | null;
   };
+  moves: string[];
 }
 
 export class GameStateManager {
@@ -22,6 +25,7 @@ export class GameStateManager {
   private game: Chess;
   private stateRef: any;
   private onStateChange: (state: GameState) => void;
+  private moves: string[] = [];
 
   constructor(gameId: string, onStateChange: (state: GameState) => void) {
     this.gameId = gameId;
@@ -37,6 +41,7 @@ export class GameStateManager {
       const state = snapshot.val();
       if (state) {
         this.game.load(state.fen);
+        this.moves = state.moves || [];
         this.onStateChange(state);
       }
     });
@@ -46,6 +51,8 @@ export class GameStateManager {
     try {
       const move = this.game.move({ from, to, promotion: 'q' });
       if (move) {
+        this.moves.push(`${from}${to}`);
+        
         const state: GameState = {
           fen: this.game.fen(),
           turn: this.game.turn(),
@@ -56,9 +63,45 @@ export class GameStateManager {
                  this.game.isDraw() ? 'd' : null,
           drawOffer: null,
           players: { white: null, black: null }, // Updated separately
+          moves: this.moves,
         };
 
         await this.updateState(state);
+
+        // If game is over, update history and ELO
+        if (state.isGameOver && state.players.white && state.players.black) {
+          const historyManager = new GameHistoryManager(state.players.white.id);
+          
+          // Determine result
+          let result: 'win' | 'loss' | 'draw';
+          if (state.winner === 'd') {
+            result = 'draw';
+          } else {
+            result = state.winner === 'w' ? 'win' : 'loss';
+          }
+
+          // Update game history
+          await historyManager.addGameToHistory(
+            state.players.black.id,
+            'chess',
+            result,
+            0, // stake amount
+            this.moves,
+            state.fen
+          );
+
+          // Calculate and update ELO ratings
+          const eloChange = calculateEloChange(
+            state.players.white.elo,
+            state.players.black.elo,
+            result
+          );
+
+          // Update players' ratings in the database
+          // This would typically be handled by a separate rating manager
+          console.log('ELO change:', eloChange);
+        }
+
         return true;
       }
       return false;
