@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { HelpCircle, PlayCircle, Trophy, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 interface GameCardProps {
@@ -26,6 +26,11 @@ export function GameCard({
   className,
 }: GameCardProps) {
   const [showRules, setShowRules] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGameStart = (mode: 'demo' | 'live') => {
+    navigate(`/game/${id}?mode=${mode}`);
+  };
 
   return (
     <motion.div
@@ -90,20 +95,20 @@ export function GameCard({
       </div>
 
       <div className="mt-4 flex gap-2">
-        <Link
-          to={`/game/${id}?mode=demo`}
+        <button
+          onClick={() => handleGameStart('demo')}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
         >
           <PlayCircle size={16} />
           Demo
-        </Link>
-        <Link
-          to={`/game/${id}?mode=live`}
+        </button>
+        <button
+          onClick={() => handleGameStart('live')}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
         >
           <PlayCircle size={16} />
           Play Live
-        </Link>
+        </button>
       </div>
     </motion.div>
   );

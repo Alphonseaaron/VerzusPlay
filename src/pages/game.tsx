@@ -18,12 +18,13 @@ export function GamePage() {
   
   const game = ALL_GAMES.find((g) => g.id === id);
   const [showRules, setShowRules] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true); // Always show modal initially
   const initGame = useGameStore((state) => state.initGame);
 
   useEffect(() => {
-    if (id === 'chess') {
+    if (id === 'chess' && type) {
       initGame(mode, type || 'casual', stake);
+      setShowModal(false); // Hide modal once game is initialized with type
     }
   }, [id, mode, type, stake, initGame]);
 
@@ -37,7 +38,8 @@ export function GamePage() {
 
   const Icon = game.icon;
 
-  if (id === 'chess' && mode === 'live' && !type) {
+  // Show modal for both demo and live modes when no type is selected
+  if (id === 'chess' && !type) {
     return <GameModal isOpen={true} onClose={() => setShowModal(false)} />;
   }
 
@@ -89,6 +91,8 @@ export function GamePage() {
           </div>
         </div>
       )}
+
+      <GameModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 }
