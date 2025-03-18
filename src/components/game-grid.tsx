@@ -1,12 +1,12 @@
 import { 
-  ChevronRight,
   Crown,
+  Dice3,
+  Boxes,
   Target,
-  Hash,
-  LayoutGrid,
   Puzzle,
+  Hexagon,
   Heart,
-  Wand2,
+  Sparkles,
   Trophy,
   CircleDot,
   Zap,
@@ -25,7 +25,7 @@ export const ALL_GAMES = [
   {
     id: 'chess',
     title: 'Chess Masters',
-    icon: ChevronRight,
+    icon: Crown,
     category: 'Board & Strategy',
     players: 'ELO Matchmaking',
     prize: '$100 Pool',
@@ -34,7 +34,7 @@ export const ALL_GAMES = [
   {
     id: 'checkers',
     title: 'Checkers Pro',
-    icon: Crown,
+    icon: Dice3,
     category: 'Board & Strategy',
     players: 'ELO Matchmaking',
     prize: '$75 Pool',
@@ -43,7 +43,7 @@ export const ALL_GAMES = [
   {
     id: 'ludo',
     title: 'Ludo Kings',
-    icon: Target,
+    icon: Boxes,
     category: 'Board & Strategy',
     players: '4 Players',
     prize: '$50 Pool',
@@ -52,7 +52,7 @@ export const ALL_GAMES = [
   {
     id: 'tictactoe',
     title: 'Tic-Tac-Pro',
-    icon: Hash,
+    icon: Target,
     category: 'Board & Strategy',
     players: '2 Players',
     prize: '$25 Pool',
@@ -61,7 +61,7 @@ export const ALL_GAMES = [
   {
     id: 'connect4',
     title: 'Connect Four',
-    icon: LayoutGrid,
+    icon: Hexagon,
     category: 'Board & Strategy',
     players: '2 Players',
     prize: '$40 Pool',
@@ -88,7 +88,7 @@ export const ALL_GAMES = [
   {
     id: 'snakeladders',
     title: 'Snake & Ladders',
-    icon: Wand2,
+    icon: Sparkles,
     category: 'Board & Strategy',
     players: '4 Players',
     prize: '$45 Pool',

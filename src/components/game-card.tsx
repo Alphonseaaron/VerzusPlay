@@ -39,8 +39,21 @@ export function GameCard({
     >
       <div className="relative mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-white/20 p-3">
-            <Icon className="h-6 w-6 text-white" />
+          <div className={cn(
+            'rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-3',
+            'shadow-lg transition-transform duration-300',
+            'group-hover:scale-110 group-hover:shadow-purple-500/20',
+            'relative before:absolute before:inset-0 before:rounded-xl',
+            'before:bg-gradient-to-br before:from-white/20 before:to-transparent',
+            'before:opacity-0 before:transition-opacity before:duration-300',
+            'group-hover:before:opacity-100'
+          )}>
+            <Icon className={cn(
+              'h-8 w-8 transition-all duration-300',
+              'text-purple-400 group-hover:text-purple-300',
+              'drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)]',
+              'group-hover:drop-shadow-[0_4px_8px_rgba(168,85,247,0.6)]'
+            )} />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">{title}</h3>
