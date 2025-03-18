@@ -1,4 +1,23 @@
-import { ChevronRight as ChessKnight, Crown, Dices, Gamepad2, Hash, Heart, LayoutGrid, Puzzle, Rocket, Skull, Spade, Target, Timer, Trophy, Wand2, Zap } from 'lucide-react';
+import { 
+  ChevronRight,
+  Crown,
+  Target,
+  Hash,
+  LayoutGrid,
+  Puzzle,
+  Heart,
+  Wand2,
+  Trophy,
+  CircleDot,
+  Zap,
+  Candy,
+  Blocks,
+  Footprints,
+  Dices,
+  Gamepad2,
+  Rocket,
+  type LucideIcon
+} from 'lucide-react';
 import { GameCard } from './game-card';
 
 export const ALL_GAMES = [
@@ -6,7 +25,7 @@ export const ALL_GAMES = [
   {
     id: 'chess',
     title: 'Chess Masters',
-    icon: ChessKnight,
+    icon: ChevronRight,
     category: 'Board & Strategy',
     players: 'ELO Matchmaking',
     prize: '$100 Pool',
@@ -89,7 +108,7 @@ export const ALL_GAMES = [
   {
     id: 'pool',
     title: '8-Ball Pool',
-    icon: Spade,
+    icon: CircleDot,
     category: 'Skill & Sports',
     players: 'Live Matches',
     prize: '$80 Pool',
@@ -107,7 +126,7 @@ export const ALL_GAMES = [
   {
     id: 'sugarcrash',
     title: 'Sugar Crash',
-    icon: Rocket,
+    icon: Candy,
     category: 'Skill & Sports',
     players: 'Score Attack',
     prize: '$55 Pool',
@@ -116,7 +135,7 @@ export const ALL_GAMES = [
   {
     id: 'tetris',
     title: 'Tetris Masters',
-    icon: LayoutGrid,
+    icon: Blocks,
     category: 'Skill & Sports',
     players: 'Score Attack',
     prize: '$70 Pool',
@@ -125,7 +144,7 @@ export const ALL_GAMES = [
   {
     id: 'temple',
     title: 'Temple Sprint',
-    icon: Skull,
+    icon: Footprints,
     category: 'Skill & Sports',
     players: 'Distance Run',
     prize: '$65 Pool',
@@ -154,7 +173,7 @@ export const ALL_GAMES = [
   {
     id: 'crash',
     title: 'Crash Rocket',
-    icon: Timer,
+    icon: Rocket,
     category: 'Casino',
     players: 'Single Player',
     prize: 'Win 1000x',

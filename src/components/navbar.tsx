@@ -16,7 +16,17 @@ interface NavItemProps {
   icon: LucideIcon;
   label: string;
   to: string;
+  requiresAuth?: boolean;
 }
+
+const NAV_ITEMS: NavItemProps[] = [
+  { icon: Home, label: 'Home', to: '/' },
+  { icon: LayoutGrid, label: 'Games', to: '/games' },
+  { icon: Trophy, label: 'Tournaments', to: '/tournaments', requiresAuth: true },
+  { icon: Award, label: 'Leaderboard', to: '/leaderboard' },
+  { icon: Wallet, label: 'Wallet', to: '/wallet', requiresAuth: true },
+  { icon: Settings, label: 'Settings', to: '/settings', requiresAuth: true },
+];
 
 function NavItem({ icon: Icon, label, to }: NavItemProps) {
   const location = useLocation();
@@ -65,12 +75,9 @@ export function Navbar() {
           'lg:mt-8 lg:flex-col lg:items-stretch lg:gap-2'
         )}
       >
-        <NavItem icon={Home} label="Home" to="/" />
-        <NavItem icon={LayoutGrid} label="Games" to="/games" />
-        <NavItem icon={Trophy} label="Tournaments" to="/tournaments" />
-        <NavItem icon={Award} label="Leaderboard" to="/leaderboard" />
-        <NavItem icon={Wallet} label="Wallet" to="/wallet" />
-        <NavItem icon={Settings} label="Settings" to="/settings" />
+        {NAV_ITEMS.map((item) => (
+          <NavItem key={item.to} {...item} />
+        ))}
       </div>
     </nav>
   );
