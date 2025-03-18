@@ -1,7 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './lib/auth';
 import { Navbar } from './components/navbar';
-import { AuthGuard } from './components/auth/auth-guard';
 import { GamePage } from './pages/game';
 import { GamesPage } from './pages/games';
 import { HomePage } from './pages/home';
@@ -20,54 +19,12 @@ function App() {
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route 
-                path="/games" 
-                element={
-                  <AuthGuard allowGuest>
-                    <GamesPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/game/:id" 
-                element={
-                  <AuthGuard>
-                    <GamePage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/tournaments" 
-                element={
-                  <AuthGuard>
-                    <TournamentsPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/leaderboard" 
-                element={
-                  <AuthGuard allowGuest>
-                    <LeaderboardPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/wallet" 
-                element={
-                  <AuthGuard>
-                    <WalletPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/settings" 
-                element={
-                  <AuthGuard>
-                    <SettingsPage />
-                  </AuthGuard>
-                } 
-              />
+              <Route path="/games" element={<GamesPage />} />
+              <Route path="/game/:id" element={<GamePage />} />
+              <Route path="/tournaments" element={<TournamentsPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </div>
         </main>

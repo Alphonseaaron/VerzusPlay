@@ -9,23 +9,24 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '../lib/auth';
+import { AuthModal } from './auth/auth-modal';
 import { cn } from '../lib/utils';
 
 interface NavItemProps {
   icon: LucideIcon;
   label: string;
   to: string;
-  requiresAuth?: boolean;
 }
 
 const NAV_ITEMS: NavItemProps[] = [
   { icon: Home, label: 'Home', to: '/' },
   { icon: LayoutGrid, label: 'Games', to: '/games' },
-  { icon: Trophy, label: 'Tournaments', to: '/tournaments', requiresAuth: true },
+  { icon: Trophy, label: 'Tournaments', to: '/tournaments' },
   { icon: Award, label: 'Leaderboard', to: '/leaderboard' },
-  { icon: Wallet, label: 'Wallet', to: '/wallet', requiresAuth: true },
-  { icon: Settings, label: 'Settings', to: '/settings', requiresAuth: true },
+  { icon: Settings, label: 'Settings', to: '/settings' },
 ];
 
 function NavItem({ icon: Icon, label, to }: NavItemProps) {
@@ -54,31 +55,59 @@ function NavItem({ icon: Icon, label, to }: NavItemProps) {
 }
 
 export function Navbar() {
-  return (
-    <nav
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-50 lg:left-0 lg:top-0 lg:h-screen lg:w-64',
-        'bg-white/5 backdrop-blur-xl lg:border-r lg:border-white/10',
-        'p-4'
-      )}
-    >
-      <div className="hidden items-center gap-3 px-4 lg:flex">
-        <Link to="/" className="flex items-center gap-3">
-          <Gamepad2 className="h-8 w-8 text-white" />
-          <h1 className="text-xl font-bold text-white">VerzusPlay</h1>
-        </Link>
-      </div>
+  const { user, profile } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const navigate = useNavigate();
 
-      <div
+  return (
+    <>
+      <nav
         className={cn(
-          'flex items-center justify-around gap-1',
-          'lg:mt-8 lg:flex-col lg:items-stretch lg:gap-2'
+          'fixed bottom-0 left-0 right-0 z-50 lg:left-0 lg:top-0 lg:h-screen lg:w-64',
+          'bg-white/5 backdrop-blur-xl lg:border-r lg:border-white/10',
+          'flex flex-col p-4'
         )}
       >
-        {NAV_ITEMS.map((item) => (
-          <NavItem key={item.to} {...item} />
-        ))}
-      </div>
-    </nav>
+        <div className="flex items-center gap-3 px-4">
+          <Link to="/" className="flex items-center gap-3">
+            <Gamepad2 className="h-8 w-8 text-white" />
+            <h1 className="hidden text-xl font-bold text-white lg:block">VerzusPlay</h1>
+          </Link>
+        </div>
+
+        <div className="mt-8 flex flex-col items-stretch gap-2">
+          {NAV_ITEMS.map((item) => (
+            <NavItem key={item.to} {...item} />
+          ))}
+        </div>
+
+        <div className="mt-auto px-4 pt-8 lg:pt-16">
+          {user ? (
+            <Link to="/wallet" className="block w-full">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+              >
+                <Wallet className="h-5 w-5" />
+                <span className="hidden lg:block">${profile?.balance || '0.00'}</span>
+              </motion.button>
+            </Link>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowAuthModal(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+            >
+              <Wallet className="h-5 w-5" />
+              <span className="hidden lg:block">Sign In</span>
+            </motion.button>
+          )}
+        </div>
+      </nav>
+
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+    </>
   );
 }
