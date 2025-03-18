@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Loader2, Search } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { countries } from '../../lib/countries';
 import { cn } from '../../lib/utils';
@@ -20,8 +20,21 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [showPhoneDropdown, setShowPhoneDropdown] = useState(false);
+  const [phoneSearch, setPhoneSearch] = useState('');
   
   const { signIn, signUp } = useAuth();
+
+  const filteredCountries = countries.filter(country => 
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  const filteredPhoneCodes = countries.filter(country =>
+    country.name.toLowerCase().includes(phoneSearch.toLowerCase()) ||
+    country.dialCode.includes(phoneSearch)
+  );
 
   if (!isOpen) return null;
 
@@ -63,6 +76,19 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
+  const dropdownStyles = {
+    container: "absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-white/20 bg-gray-800/95 shadow-xl backdrop-blur-xl",
+    searchContainer: "sticky top-0 border-b border-white/20 bg-gray-800/95 p-2",
+    searchInput: "flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2",
+    searchIcon: "h-4 w-4 text-white/60",
+    input: "w-full bg-transparent text-sm text-white placeholder-white/50 focus:outline-none",
+    listContainer: "max-h-48 overflow-y-auto",
+    option: "flex w-full items-center gap-2 px-4 py-2 text-white transition-colors hover:bg-white/10",
+    flag: "text-2xl",
+    text: "text-white/90",
+    subtext: "text-sm text-white/60",
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -74,7 +100,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="relative w-full max-w-md rounded-2xl bg-white/10 p-6 backdrop-blur-xl"
+        className="relative w-full max-w-md rounded-2xl bg-gray-800/95 p-6 shadow-2xl backdrop-blur-xl"
       >
         <h2 className="mb-6 text-2xl font-bold text-white">
           {isSignUp ? 'Create Account' : 'Sign In'}
@@ -95,44 +121,119 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className="flex w-full items-center justify-between rounded-lg bg-white/10 px-4 py-2 text-white"
+                  onClick={() => {
+                    setShowCountryDropdown(!showCountryDropdown);
+                    setShowPhoneDropdown(false);
+                  }}
+                  className="flex w-full items-center justify-between rounded-lg bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">{selectedCountry.flag}</span>
-                    <span>{selectedCountry.name}</span>
+                    <span className="text-white/90">{selectedCountry.name}</span>
                   </div>
                   <ChevronDown className="h-5 w-5" />
                 </button>
 
-                {showCountryDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white/10 backdrop-blur-xl"
-                  >
-                    {countries.map((country) => (
-                      <button
-                        key={country.code}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCountry(country);
-                          setShowCountryDropdown(false);
-                        }}
-                        className="flex w-full items-center gap-2 px-4 py-2 text-white hover:bg-white/10"
-                      >
-                        <span className="text-2xl">{country.flag}</span>
-                        <span>{country.name}</span>
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
+                <AnimatePresence>
+                  {showCountryDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={dropdownStyles.container}
+                    >
+                      <div className={dropdownStyles.searchContainer}>
+                        <div className={dropdownStyles.searchInput}>
+                          <Search className={dropdownStyles.searchIcon} />
+                          <input
+                            type="text"
+                            placeholder="Search countries..."
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            className={dropdownStyles.input}
+                          />
+                        </div>
+                      </div>
+                      <div className={dropdownStyles.listContainer}>
+                        {filteredCountries.map((country) => (
+                          <button
+                            key={country.code}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCountry(country);
+                              setShowCountryDropdown(false);
+                              setCountrySearch('');
+                            }}
+                            className={dropdownStyles.option}
+                          >
+                            <span className={dropdownStyles.flag}>{country.flag}</span>
+                            <span className={dropdownStyles.text}>{country.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="flex gap-2">
-                <div className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-white">
-                  <span className="text-2xl">{selectedCountry.flag}</span>
-                  <span>{selectedCountry.dialCode}</span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPhoneDropdown(!showPhoneDropdown);
+                      setShowCountryDropdown(false);
+                    }}
+                    className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
+                  >
+                    <span className="text-2xl">{selectedCountry.flag}</span>
+                    <span className="text-white/90">{selectedCountry.dialCode}</span>
+                    <ChevronDown className="h-5 w-5" />
+                  </button>
+
+                  <AnimatePresence>
+                    {showPhoneDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={cn(dropdownStyles.container, "w-72")}
+                      >
+                        <div className={dropdownStyles.searchContainer}>
+                          <div className={dropdownStyles.searchInput}>
+                            <Search className={dropdownStyles.searchIcon} />
+                            <input
+                              type="text"
+                              placeholder="Search country codes..."
+                              value={phoneSearch}
+                              onChange={(e) => setPhoneSearch(e.target.value)}
+                              className={dropdownStyles.input}
+                            />
+                          </div>
+                        </div>
+                        <div className={dropdownStyles.listContainer}>
+                          {filteredPhoneCodes.map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(country);
+                                setShowPhoneDropdown(false);
+                                setPhoneSearch('');
+                              }}
+                              className={dropdownStyles.option}
+                            >
+                              <span className={dropdownStyles.flag}>{country.flag}</span>
+                              <span className={dropdownStyles.text}>{country.dialCode}</span>
+                              <span className={dropdownStyles.subtext}>
+                                {country.name}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <input
                   type="tel"
