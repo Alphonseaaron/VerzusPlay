@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Bot, Trophy, Users, Plus, UserPlus } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../lib/auth';
 import { cn } from '../../lib/utils';
@@ -27,6 +27,8 @@ interface Friend {
 
 export function GameModal({ isOpen, onClose }: GameModalProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
   const { user } = useAuth();
   const [stake, setStake] = useState('');
   const [showStakeInput, setShowStakeInput] = useState(false);
@@ -42,43 +44,62 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
   ]);
 
   const handleCreateGame = () => {
-    if (!stake) {
-      toast.error('Please enter a stake amount');
-      return;
+    if (mode === 'live') {
+      if (!stake) {
+        toast.error('Please enter a stake amount');
+        return;
+      }
+      toast.success('Game created successfully! Waiting for opponent...');
+      navigate(`/game/chess?mode=live&type=create&stake=${stake}`);
+    } else {
+      // Direct creation for demo mode
+      toast.success('Game created successfully! Waiting for opponent...');
+      navigate(`/game/chess?mode=demo&type=create&stake=10`); // Default stake for demo games
     }
-    toast.success('Game created successfully! Waiting for opponent...');
-    navigate(`/game/chess?mode=live&type=create&stake=${stake}`);
     onClose();
   };
 
   const handleJoinGame = (game: AvailableGame) => {
-    toast.success('Joining game...');
-    navigate(`/game/chess?mode=live&type=join&stake=${game.stake}`);
+    if (mode === 'live') {
+      toast.success('Joining game...');
+      navigate(`/game/chess?mode=live&type=join&stake=${game.stake}`);
+    } else {
+      // Direct join for demo mode
+      toast.success('Joining game...');
+      navigate(`/game/chess?mode=demo&type=join&stake=${game.stake}`);
+    }
     onClose();
   };
 
   const handleInviteFriend = (friend: Friend) => {
-    if (!stake && selectedMode === 'invite') {
-      toast.error('Please enter a stake amount');
-      return;
+    if (mode === 'live') {
+      if (!stake) {
+        toast.error('Please enter a stake amount');
+        return;
+      }
+      toast.success(`Invitation sent to ${friend.username}`);
+      navigate(`/game/chess?mode=live&type=invite&stake=${stake}`);
+    } else {
+      // Direct invite for demo mode
+      toast.success(`Invitation sent to ${friend.username}`);
+      navigate(`/game/chess?mode=demo&type=invite&stake=10`); // Default stake for demo games
     }
-    toast.success(`Invitation sent to ${friend.username}`);
-    navigate(`/game/chess?mode=live&type=invite&stake=${stake}`);
     onClose();
   };
 
   const handleComputerGame = () => {
-    if (!stake && selectedMode === 'computer') {
-      toast.error('Please enter a stake amount');
-      return;
+    if (mode === 'live') {
+      if (!stake) {
+        toast.error('Please enter a stake amount');
+        return;
+      }
+      toast.success('Starting game against computer...');
+      navigate(`/game/chess?mode=live&type=computer&stake=${stake}`);
+    } else {
+      // Direct start for demo mode
+      toast.success('Starting game against computer...');
+      navigate(`/game/chess?mode=demo&type=computer&stake=10`); // Default stake for computer games
     }
-    toast.success('Starting game against computer...');
-    navigate(`/game/chess?mode=live&type=computer&stake=${stake}`);
-    onClose();
-  };
-
-  const handleDemoGame = () => {
-    navigate('/game/chess?mode=demo');
     onClose();
   };
 
@@ -87,6 +108,7 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
     setStake('');
     setShowStakeInput(false);
     onClose();
+    navigate('/games');
   };
 
   if (!isOpen) return null;
@@ -97,22 +119,26 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={handleCancel} // Close when clicking the backdrop
+      onClick={handleCancel}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className="w-full max-w-2xl rounded-2xl bg-white/10 p-6 backdrop-blur-xl"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the modal content
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-6 text-2xl font-bold text-white">Choose Game Mode</h2>
 
         <div className="mb-6 grid gap-4">
           <button
             onClick={() => {
-              setSelectedMode('create');
-              setShowStakeInput(true);
+              if (mode === 'live') {
+                setSelectedMode('create');
+                setShowStakeInput(true);
+              } else {
+                handleCreateGame();
+              }
             }}
             className={cn(
               'flex items-center gap-3 rounded-xl p-4',
@@ -131,8 +157,12 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
 
           <button
             onClick={() => {
-              setSelectedMode('join');
-              setShowStakeInput(false);
+              if (mode === 'live') {
+                setSelectedMode('join');
+                setShowStakeInput(false);
+              } else {
+                setSelectedMode('join');
+              }
             }}
             className={cn(
               'flex items-center gap-3 rounded-xl p-4',
@@ -151,8 +181,12 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
 
           <button
             onClick={() => {
-              setSelectedMode('invite');
-              setShowStakeInput(true);
+              if (mode === 'live') {
+                setSelectedMode('invite');
+                setShowStakeInput(true);
+              } else {
+                setSelectedMode('invite');
+              }
             }}
             className={cn(
               'flex items-center gap-3 rounded-xl p-4',
@@ -171,8 +205,12 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
 
           <button
             onClick={() => {
-              setSelectedMode('computer');
-              setShowStakeInput(true);
+              if (mode === 'live') {
+                setSelectedMode('computer');
+                setShowStakeInput(true);
+              } else {
+                handleComputerGame();
+              }
             }}
             className={cn(
               'flex items-center gap-3 rounded-xl p-4',
@@ -190,7 +228,7 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
           </button>
         </div>
 
-        {showStakeInput && (
+        {mode === 'live' && showStakeInput && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -279,40 +317,42 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
           </motion.div>
         )}
 
-        <div className="flex gap-4">
-          <button
-            onClick={handleCancel}
-            className="flex-1 rounded-lg bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/20"
-          >
-            Cancel
-          </button>
-          {selectedMode === 'create' && (
+        {mode === 'live' && (
+          <div className="flex gap-4">
             <button
-              onClick={handleCreateGame}
-              disabled={!stake}
-              className={cn(
-                'flex-1 rounded-lg px-4 py-2 font-medium transition-colors',
-                stake ? 'bg-purple-600 text-white hover:bg-purple-700' :
-                'cursor-not-allowed bg-white/10 text-white/50'
-              )}
+              onClick={handleCancel}
+              className="flex-1 rounded-lg bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/20"
             >
-              Create Game
+              Cancel
             </button>
-          )}
-          {selectedMode === 'computer' && (
-            <button
-              onClick={handleComputerGame}
-              disabled={!stake}
-              className={cn(
-                'flex-1 rounded-lg px-4 py-2 font-medium transition-colors',
-                stake ? 'bg-purple-600 text-white hover:bg-purple-700' :
-                'cursor-not-allowed bg-white/10 text-white/50'
-              )}
-            >
-              Start Game
-            </button>
-          )}
-        </div>
+            {selectedMode === 'create' && (
+              <button
+                onClick={handleCreateGame}
+                disabled={!stake}
+                className={cn(
+                  'flex-1 rounded-lg px-4 py-2 font-medium transition-colors',
+                  stake ? 'bg-purple-600 text-white hover:bg-purple-700' :
+                  'cursor-not-allowed bg-white/10 text-white/50'
+                )}
+              >
+                Create Game
+              </button>
+            )}
+            {selectedMode === 'computer' && (
+              <button
+                onClick={handleComputerGame}
+                disabled={!stake}
+                className={cn(
+                  'flex-1 rounded-lg px-4 py-2 font-medium transition-colors',
+                  stake ? 'bg-purple-600 text-white hover:bg-purple-700' :
+                  'cursor-not-allowed bg-white/10 text-white/50'
+                )}
+              >
+                Start Game
+              </button>
+            )}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
