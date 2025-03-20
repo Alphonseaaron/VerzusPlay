@@ -31,11 +31,11 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
   const [stake, setStake] = useState('');
   const [showStakeInput, setShowStakeInput] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'create' | 'join' | 'invite' | 'computer' | null>(null);
-  const [availableGames, setAvailableGames] = useState<AvailableGame[]>([
+  const [availableGames] = useState<AvailableGame[]>([
     { id: '1', creator: 'Player1', stake: 10, createdAt: new Date().toISOString() },
     { id: '2', creator: 'Player2', stake: 25, createdAt: new Date().toISOString() },
   ]);
-  const [friends, setFriends] = useState<Friend[]>([
+  const [friends] = useState<Friend[]>([
     { id: '1', username: 'Friend1', status: 'online' },
     { id: '2', username: 'Friend2', status: 'offline' },
     { id: '3', username: 'Friend3', status: 'in_game' },
@@ -46,7 +46,6 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
       toast.error('Please enter a stake amount');
       return;
     }
-    // Create game logic here
     toast.success('Game created successfully! Waiting for opponent...');
     navigate(`/game/chess?mode=live&type=create&stake=${stake}`);
     onClose();
@@ -78,6 +77,18 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
     onClose();
   };
 
+  const handleDemoGame = () => {
+    navigate('/game/chess?mode=demo');
+    onClose();
+  };
+
+  const handleCancel = () => {
+    setSelectedMode(null);
+    setStake('');
+    setShowStakeInput(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -86,12 +97,14 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={handleCancel} // Close when clicking the backdrop
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className="w-full max-w-2xl rounded-2xl bg-white/10 p-6 backdrop-blur-xl"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the modal content
       >
         <h2 className="mb-6 text-2xl font-bold text-white">Choose Game Mode</h2>
 
@@ -268,7 +281,7 @@ export function GameModal({ isOpen, onClose }: GameModalProps) {
 
         <div className="flex gap-4">
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="flex-1 rounded-lg bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/20"
           >
             Cancel
