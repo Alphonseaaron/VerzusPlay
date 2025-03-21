@@ -9,25 +9,10 @@ import {
   Trophy,
   Users,
   Crown,
-  Dice3,
-  Boxes,
-  Target,
-  Puzzle,
-  Hexagon,
-  Heart,
-  Sparkles,
-  CircleDot,
-  Zap,
-  Candy,
-  Blocks,
-  Footprints,
-  Dices,
-  Rocket,
   LogIn,
 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { TournamentManager } from '../lib/tournaments';
-import { GameCard } from '../components/game-card';
 import { ALL_GAMES } from '../components/game-grid';
 import type { Tournament } from '../lib/firebase';
 import { cn } from '../lib/utils';
@@ -195,106 +180,101 @@ export function TournamentsPage() {
         </motion.div>
       )}
 
-      {/* Game Selection */}
+      {/* Tournament Pools */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ALL_GAMES.map((game) => (
           <motion.div
             key={game.id}
             whileHover={{ scale: 1.02 }}
-            onClick={() => setSelectedGame(selectedGame === game.id ? null : game.id)}
-            className={cn(
-              'cursor-pointer overflow-hidden rounded-xl backdrop-blur-xl',
-              'transition-all duration-300',
-              selectedGame === game.id ? 'bg-purple-600' : 'bg-white/10 hover:bg-white/20'
-            )}
+            className="overflow-hidden rounded-xl bg-white/10 backdrop-blur-xl"
           >
             <div className="border-b border-white/10 p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className={cn(
-                  'rounded-lg p-3',
-                  selectedGame === game.id ? 'bg-white/20' : 'bg-purple-600'
-                )}>
+                <div className="rounded-lg bg-purple-600 p-3">
                   <game.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    {game.title}
-                  </h3>
+                  <h3 className="text-lg font-semibold text-white">{game.title}</h3>
                   <p className="text-sm text-white/60">{game.category}</p>
                 </div>
               </div>
 
-              {selectedGame === game.id && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  className="space-y-4"
-                >
-                  {ENTRY_FEES.map(fee => {
-                    const pool = activePools.find(p => 
-                      p.gameId === game.id && 
-                      p.entryFee === fee && 
-                      p.status === 'filling'
-                    );
+              {/* Tournament Pools */}
+              <div className="space-y-4">
+                {ENTRY_FEES.map(fee => {
+                  const pool = activePools.find(p => 
+                    p.gameId === game.id && 
+                    p.entryFee === fee && 
+                    p.status === 'filling'
+                  );
 
-                    if (!pool) return null;
+                  if (!pool) return null;
 
-                    return (
-                      <div
-                        key={`${game.id}-${fee}`}
-                        className="rounded-lg bg-white/10 p-4"
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="font-medium text-white">
-                            ${fee} Tournament
-                          </span>
-                          <span className="text-sm text-white/60">
-                            {pool.currentPlayers}/{pool.maxPlayers} Players
-                          </span>
-                        </div>
-                        <div className="mb-4 h-2 overflow-hidden rounded-full bg-white/10">
-                          <div
-                            className="h-full bg-green-500 transition-all"
-                            style={{
-                              width: `${(pool.currentPlayers / pool.maxPlayers) * 100}%`
-                            }}
-                          />
-                        </div>
-                        <button
-                          onClick={() => handleJoinTournament(pool)}
-                          className="w-full rounded-lg bg-white/20 px-4 py-2 font-medium text-white transition-colors hover:bg-white/30"
-                        >
-                          Join for ${fee}
-                        </button>
+                  const prizePool = fee * PLAYERS_PER_TOURNAMENT;
+                  const houseCut = prizePool * (HOUSE_CUT_PERCENTAGE / 100);
+                  const winnerPrize = prizePool - houseCut;
+
+                  return (
+                    <div
+                      key={`${game.id}-${fee}`}
+                      className="rounded-lg bg-white/10 p-4"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium text-white">
+                          ${fee} Tournament
+                        </span>
+                        <span className="text-sm text-green-400">
+                          Win ${winnerPrize}
+                        </span>
                       </div>
-                    );
-                  })}
-                </motion.div>
-              )}
+                      <div className="mb-2 flex items-center justify-between text-sm text-white/60">
+                        <span>
+                          {pool.currentPlayers}/{pool.maxPlayers} Players
+                        </span>
+                        <span>
+                          {pool.maxPlayers - pool.currentPlayers} slots left
+                        </span>
+                      </div>
+                      <div className="mb-4 h-2 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full bg-green-500 transition-all"
+                          style={{
+                            width: `${(pool.currentPlayers / pool.maxPlayers) * 100}%`
+                          }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleJoinTournament(pool)}
+                        className="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-700"
+                      >
+                        Join for ${fee}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Active Tournaments */}
-            {selectedGame === game.id && (
-              <div className="space-y-2 p-6">
-                <h4 className="font-medium text-white">Active Tournaments</h4>
-                {activePools
-                  .filter(p => p.gameId === game.id && p.status === 'running')
-                  .map(pool => (
-                    <div
-                      key={pool.id}
-                      className="rounded-lg bg-white/10 p-4 text-sm text-white/80"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>${pool.entryFee} Tournament</span>
-                        <span>Prize: ${pool.prizePool}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-white/60">
-                        Started {format(new Date(pool.startTime!), 'HH:mm:ss')}
-                      </div>
+            <div className="space-y-2 p-6">
+              <h4 className="font-medium text-white">Active Tournaments</h4>
+              {activePools
+                .filter(p => p.gameId === game.id && p.status === 'running')
+                .map(pool => (
+                  <div
+                    key={pool.id}
+                    className="rounded-lg bg-white/10 p-4 text-sm text-white/80"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>${pool.entryFee} Tournament</span>
+                      <span>Prize: ${pool.prizePool}</span>
                     </div>
-                  ))}
-              </div>
-            )}
+                    <div className="mt-1 text-xs text-white/60">
+                      Started {format(new Date(pool.startTime!), 'HH:mm:ss')}
+                    </div>
+                  </div>
+                ))}
+            </div>
           </motion.div>
         ))}
       </div>

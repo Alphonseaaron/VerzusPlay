@@ -34,6 +34,7 @@ export function GameCard({
 
   return (
     <motion.div
+      layout
       whileHover={{ scale: 1.02 }}
       className={cn(
         'group relative overflow-hidden rounded-xl bg-white/10 p-4 backdrop-blur-xl',
@@ -42,7 +43,7 @@ export function GameCard({
         className
       )}
     >
-      <div className="relative mb-4 flex items-center justify-between">
+      <motion.div layout="position" className="relative mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={cn(
             'rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-3',
@@ -71,10 +72,11 @@ export function GameCard({
         >
           <HelpCircle className="h-5 w-5 text-white" />
         </button>
-      </div>
+      </motion.div>
 
       {showRules && (
         <motion.div
+          layout="position"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
@@ -84,7 +86,7 @@ export function GameCard({
         </motion.div>
       )}
 
-      <div className="flex items-center justify-between">
+      <motion.div layout="position" className="flex items-center justify-between">
         <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md">
           {category}
         </span>
@@ -92,9 +94,9 @@ export function GameCard({
           <Trophy size={12} className="text-yellow-400" />
           {prize}
         </span>
-      </div>
+      </motion.div>
 
-      <div className="mt-4 flex gap-2">
+      <motion.div layout="position" className="mt-4 flex gap-2">
         <button
           onClick={() => handleGameStart('demo')}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
@@ -109,7 +111,7 @@ export function GameCard({
           <PlayCircle size={16} />
           Play Live
         </button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
