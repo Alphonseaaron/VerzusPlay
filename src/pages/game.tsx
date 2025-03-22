@@ -13,7 +13,7 @@ export function GamePage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as 'demo' | 'live';
-  const type = searchParams.get('type') as 'ranked' | 'tournament' | 'casual';
+  const type = searchParams.get('type') as 'ranked' | 'tournament' | 'casual' | 'computer';
   const stake = parseFloat(searchParams.get('stake') || '0');
   
   const game = ALL_GAMES.find((g) => g.id === id);
@@ -23,7 +23,7 @@ export function GamePage() {
 
   useEffect(() => {
     if (id === 'chess' && type) {
-      initGame(mode, type || 'casual', stake);
+      initGame(mode || 'demo', type || 'casual', stake);
     }
   }, [id, mode, type, stake, initGame]);
 

@@ -16,7 +16,7 @@ const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
 export function ChessBoard() {
-  const { game, selectedSquare, validMoves, makeMove, selectSquare } = useGameStore();
+  const { game, selectedSquare, validMoves, makeMove, selectSquare, matchType, turn } = useGameStore();
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const sensors = useSensors(mouseSensor, touchSensor);
@@ -61,7 +61,10 @@ export function ChessBoard() {
                       id={square}
                       type={piece.type}
                       color={piece.color}
-                      isDraggable={piece.color === game.turn()}
+                      isDraggable={
+                        piece.color === turn &&
+                        !(matchType === 'computer' && piece.color === 'b')
+                      }
                     />
                   )}
                 </ChessSquare>

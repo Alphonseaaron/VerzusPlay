@@ -203,8 +203,9 @@ export function TournamentsPage() {
         {ALL_GAMES.map((game) => (
           <motion.div
             key={game.id}
-            layout
+            layout="position"
             className="overflow-hidden rounded-xl bg-white/10 backdrop-blur-xl"
+            style={{ height: 'fit-content' }}
           >
             <div className="p-6">
               <div 
@@ -229,6 +230,10 @@ export function TournamentsPage() {
                   opacity: expandedGame === game.id ? 1 : 0
                 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  overflow: 'hidden',
+                  transformOrigin: 'top'
+                }}
               >
                 {ENTRY_FEES.map(fee => {
                   const pool = activePools.find(p => 
@@ -246,7 +251,7 @@ export function TournamentsPage() {
                   return (
                     <motion.div
                       key={`${game.id}-${fee}`}
-                      layout
+                      layout="position"
                       className="rounded-lg bg-white/10 p-4"
                     >
                       <div className="mb-2 flex items-center justify-between">
