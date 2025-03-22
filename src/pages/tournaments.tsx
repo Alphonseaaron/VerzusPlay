@@ -1,16 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-import {
-  Calendar,
-  Clock,
-  DollarSign,
-  Gamepad2,
-  Trophy,
-  Users,
-  Crown,
-  LogIn,
-} from 'lucide-react';
+import { LogIn, Trophy, Users, Clock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { TournamentManager } from '../lib/tournaments';
 import { ALL_GAMES } from '../components/game-grid';
@@ -25,7 +15,6 @@ interface TournamentPool {
   maxPlayers: number;
   status: 'filling' | 'running' | 'completed';
   prizePool: number;
-  startTime?: string;
 }
 
 const ENTRY_FEES = [2, 5, 10];
@@ -38,7 +27,8 @@ export function TournamentsPage() {
   const [activePools, setActivePools] = useState<TournamentPool[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [showRejoinModal, setShowRejoinModal] = useState(false);
+  const [lastGameStake, setLastGameStake] = useState<number | null>(null);
 
   useEffect(() => {
     const loadTournaments = async () => {
@@ -54,9 +44,8 @@ export function TournamentsPage() {
               entryFee: fee,
               currentPlayers: players,
               maxPlayers: PLAYERS_PER_TOURNAMENT,
-              status: players === PLAYERS_PER_TOURNAMENT ? 'running' : 'filling',
+              status: 'filling',
               prizePool: fee * PLAYERS_PER_TOURNAMENT * (1 - HOUSE_CUT_PERCENTAGE / 100),
-              startTime: players === PLAYERS_PER_TOURNAMENT ? new Date().toISOString() : undefined,
             });
           });
         });
@@ -81,9 +70,8 @@ export function TournamentsPage() {
               entryFee: fee,
               currentPlayers: players,
               maxPlayers: PLAYERS_PER_TOURNAMENT,
-              status: players === PLAYERS_PER_TOURNAMENT ? 'running' : 'filling',
+              status: 'filling',
               prizePool: fee * PLAYERS_PER_TOURNAMENT * (1 - HOUSE_CUT_PERCENTAGE / 100),
-              startTime: players === PLAYERS_PER_TOURNAMENT ? new Date().toISOString() : undefined,
             });
           });
         });
@@ -114,7 +102,6 @@ export function TournamentsPage() {
             ...p,
             currentPlayers: newPlayerCount,
             status: newPlayerCount === PLAYERS_PER_TOURNAMENT ? 'running' : 'filling',
-            startTime: newPlayerCount === PLAYERS_PER_TOURNAMENT ? new Date().toISOString() : undefined,
           };
         }
         return p;
@@ -134,6 +121,8 @@ export function TournamentsPage() {
       }
 
       setActivePools(updatedPools);
+      setLastGameStake(pool.entryFee);
+      setShowRejoinModal(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join tournament');
     }
@@ -154,9 +143,9 @@ export function TournamentsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h2 className="mb-4 text-4xl font-bold text-white">Tournaments</h2>
+        <h2 className="mb-4 text-4xl font-bold text-white">Fast & Affordable Tournaments</h2>
         <p className="mx-auto max-w-2xl text-lg text-white/60">
-          Join fast-paced tournaments with instant rewards. Play, win, and rejoin immediately!
+          Join instant tournaments, play fast matches, and win real prizes. New tournaments auto-generate when full!
         </p>
       </motion.div>
 
@@ -180,16 +169,44 @@ export function TournamentsPage() {
         </motion.div>
       )}
 
+      {/* How It Works */}
+      <div className="mx-auto max-w-4xl rounded-xl bg-white/5 p-6 backdrop-blur-xl">
+        <h3 className="mb-4 text-xl font-semibold text-white">How It Works</h3>
+        <div className="grid gap-6 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Users className="h-6 w-6 text-purple-400" />
+            <h4 className="font-medium text-white">5 Players Per Pool</h4>
+            <p className="text-sm text-white/60">
+              Quick tournaments with 5 players each. New pools auto-generate when full.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Trophy className="h-6 w-6 text-purple-400" />
+            <h4 className="font-medium text-white">Winner Takes All</h4>
+            <p className="text-sm text-white/60">
+              First place wins 80% of the total pool. House takes 20%.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Clock className="h-6 w-6 text-purple-400" />
+            <h4 className="font-medium text-white">Fast Matches</h4>
+            <p className="text-sm text-white/60">
+              Short time limits ensure quick games and frequent participation.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Tournament Pools */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ALL_GAMES.map((game) => (
           <motion.div
             key={game.id}
-            whileHover={{ scale: 1.02 }}
+            layout
             className="overflow-hidden rounded-xl bg-white/10 backdrop-blur-xl"
           >
-            <div className="border-b border-white/10 p-6">
-              <div className="mb-4 flex items-center gap-3">
+            <div className="p-6">
+              <div className="mb-6 flex items-center gap-3">
                 <div className="rounded-lg bg-purple-600 p-3">
                   <game.icon className="h-6 w-6 text-white" />
                 </div>
@@ -199,7 +216,7 @@ export function TournamentsPage() {
                 </div>
               </div>
 
-              {/* Tournament Pools */}
+              {/* Auto-Pooling System */}
               <div className="space-y-4">
                 {ENTRY_FEES.map(fee => {
                   const pool = activePools.find(p => 
@@ -215,8 +232,9 @@ export function TournamentsPage() {
                   const winnerPrize = prizePool - houseCut;
 
                   return (
-                    <div
+                    <motion.div
                       key={`${game.id}-${fee}`}
+                      layout
                       className="rounded-lg bg-white/10 p-4"
                     >
                       <div className="mb-2 flex items-center justify-between">
@@ -247,37 +265,62 @@ export function TournamentsPage() {
                         onClick={() => handleJoinTournament(pool)}
                         className="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-700"
                       >
-                        Join for ${fee}
+                        Join Tournament
                       </button>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Active Tournaments */}
-            <div className="space-y-2 p-6">
-              <h4 className="font-medium text-white">Active Tournaments</h4>
-              {activePools
-                .filter(p => p.gameId === game.id && p.status === 'running')
-                .map(pool => (
-                  <div
-                    key={pool.id}
-                    className="rounded-lg bg-white/10 p-4 text-sm text-white/80"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>${pool.entryFee} Tournament</span>
-                      <span>Prize: ${pool.prizePool}</span>
-                    </div>
-                    <div className="mt-1 text-xs text-white/60">
-                      Started {format(new Date(pool.startTime!), 'HH:mm:ss')}
-                    </div>
-                  </div>
-                ))}
-            </div>
           </motion.div>
         ))}
       </div>
+
+      {/* Rejoin Modal */}
+      {showRejoinModal && lastGameStake && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-md rounded-xl bg-white/10 p-6 backdrop-blur-xl"
+          >
+            <h3 className="mb-4 text-xl font-semibold text-white">
+              Ready for Another Round?
+            </h3>
+            <p className="mb-6 text-white/60">
+              Join another ${lastGameStake} tournament immediately and keep playing!
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowRejoinModal(false)}
+                className="flex-1 rounded-lg bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/20"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => {
+                  const pool = activePools.find(p => 
+                    p.entryFee === lastGameStake && 
+                    p.status === 'filling'
+                  );
+                  if (pool) {
+                    handleJoinTournament(pool);
+                  }
+                  setShowRejoinModal(false);
+                }}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-700"
+              >
+                <ArrowRight className="h-5 w-5" />
+                Play Again
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Tournament Stats */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
