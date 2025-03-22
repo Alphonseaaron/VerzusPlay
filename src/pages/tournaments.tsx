@@ -29,6 +29,7 @@ export function TournamentsPage() {
   const [error, setError] = useState('');
   const [showRejoinModal, setShowRejoinModal] = useState(false);
   const [lastGameStake, setLastGameStake] = useState<number | null>(null);
+  const [expandedGame, setExpandedGame] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTournaments = async () => {
@@ -206,7 +207,10 @@ export function TournamentsPage() {
             className="overflow-hidden rounded-xl bg-white/10 backdrop-blur-xl"
           >
             <div className="p-6">
-              <div className="mb-6 flex items-center gap-3">
+              <div 
+                className="mb-6 flex items-center gap-3 cursor-pointer"
+                onClick={() => setExpandedGame(expandedGame === game.id ? null : game.id)}
+              >
                 <div className="rounded-lg bg-purple-600 p-3">
                   <game.icon className="h-6 w-6 text-white" />
                 </div>
@@ -217,7 +221,15 @@ export function TournamentsPage() {
               </div>
 
               {/* Auto-Pooling System */}
-              <div className="space-y-4">
+              <motion.div 
+                className="space-y-4"
+                initial={false}
+                animate={{ 
+                  height: expandedGame === game.id ? 'auto' : 0,
+                  opacity: expandedGame === game.id ? 1 : 0
+                }}
+                transition={{ duration: 0.3 }}
+              >
                 {ENTRY_FEES.map(fee => {
                   const pool = activePools.find(p => 
                     p.gameId === game.id && 
@@ -270,7 +282,7 @@ export function TournamentsPage() {
                     </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         ))}
