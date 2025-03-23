@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { GameModal } from '../components/chess/game-modal';
+import { ChessGameModal } from '../components/chess/game-modal';
+import { CheckersGameModal } from '../components/checkers/game-modal';
 import { GameContainer } from '../components/games/game-container';
 import { ALL_GAMES } from '../components/game-grid';
 
@@ -27,6 +28,17 @@ export function GamePage() {
 
   const Icon = game.icon;
 
+  const renderGameModal = () => {
+    switch (id) {
+      case 'chess':
+        return <ChessGameModal isOpen={showModal} onClose={() => setShowModal(false)} />;
+      case 'checkers':
+        return <CheckersGameModal isOpen={showModal} onClose={() => setShowModal(false)} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-8 flex items-center justify-between">
@@ -48,6 +60,8 @@ export function GamePage() {
           <HelpCircle className="h-6 w-6 text-white" />
         </button>
       </div>
+
+      
 
       {showRules && (
         <motion.div
@@ -75,10 +89,7 @@ export function GamePage() {
         </div>
       )}
 
-      <GameModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-      />
+      {renderGameModal()}
     </div>
   );
 }

@@ -25,7 +25,7 @@ interface Friend {
   avatar?: string;
 }
 
-export function ChessGameModal({ isOpen, onClose }: GameModalProps) {
+export function CheckersGameModal({ isOpen, onClose }: GameModalProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
@@ -50,10 +50,10 @@ export function ChessGameModal({ isOpen, onClose }: GameModalProps) {
         return;
       }
       toast.success('Game created successfully! Waiting for opponent...');
-      navigate(`/game/chess?mode=live&type=create&stake=${stake}`);
+      navigate(`/game/checkers?mode=live&type=create&stake=${stake}`);
     } else {
       toast.success('Game created successfully! Waiting for opponent...');
-      navigate(`/game/chess?mode=demo&type=create&stake=10`);
+      navigate(`/game/checkers?mode=demo&type=create&stake=10`);
     }
     onClose();
   };
@@ -61,10 +61,10 @@ export function ChessGameModal({ isOpen, onClose }: GameModalProps) {
   const handleJoinGame = (game: AvailableGame) => {
     if (mode === 'live') {
       toast.success('Joining game...');
-      navigate(`/game/chess?mode=live&type=join&stake=${game.stake}`);
+      navigate(`/game/checkers?mode=live&type=join&stake=${game.stake}`);
     } else {
       toast.success('Joining game...');
-      navigate(`/game/chess?mode=demo&type=join&stake=${game.stake}`);
+      navigate(`/game/checkers?mode=demo&type=join&stake=${game.stake}`);
     }
     onClose();
   };
@@ -76,10 +76,10 @@ export function ChessGameModal({ isOpen, onClose }: GameModalProps) {
         return;
       }
       toast.success(`Invitation sent to ${friend.username}`);
-      navigate(`/game/chess?mode=live&type=invite&stake=${stake}`);
+      navigate(`/game/checkers?mode=live&type=invite&stake=${stake}`);
     } else {
       toast.success(`Invitation sent to ${friend.username}`);
-      navigate(`/game/chess?mode=demo&type=invite&stake=10`);
+      navigate(`/game/checkers?mode=demo&type=invite&stake=10`);
     }
     onClose();
   };
@@ -91,10 +91,10 @@ export function ChessGameModal({ isOpen, onClose }: GameModalProps) {
         return;
       }
       toast.success('Starting game against computer...');
-      navigate(`/game/chess?mode=live&type=computer&stake=${stake}`);
+      navigate(`/game/checkers?mode=live&type=computer&stake=${stake}`);
     } else {
       toast.success('Starting game against computer...');
-      navigate(`/game/chess?mode=demo&type=computer&stake=10`);
+      navigate(`/game/checkers?mode=demo&type=computer&stake=10`);
     }
     onClose();
   };
