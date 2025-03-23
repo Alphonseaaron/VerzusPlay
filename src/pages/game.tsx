@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ChessGameModal } from '../components/chess/game-modal';
 import { CheckersGameModal } from '../components/checkers/game-modal';
+import { LudoGameModal } from '../components/ludo/game-modal';
 import { GameContainer } from '../components/games/game-container';
 import { ALL_GAMES } from '../components/game-grid';
 
@@ -34,6 +35,8 @@ export function GamePage() {
         return <ChessGameModal isOpen={showModal} onClose={() => setShowModal(false)} />;
       case 'checkers':
         return <CheckersGameModal isOpen={showModal} onClose={() => setShowModal(false)} />;
+      case 'ludo':
+        return <LudoGameModal isOpen={showModal} onClose={() => setShowModal(false)} />;
       default:
         return null;
     }
@@ -60,8 +63,6 @@ export function GamePage() {
           <HelpCircle className="h-6 w-6 text-white" />
         </button>
       </div>
-
-      
 
       {showRules && (
         <motion.div
