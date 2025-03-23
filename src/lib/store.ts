@@ -133,11 +133,16 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     if (selectedSquare) {
       // Try to make a move if the selected square is different
       if (selectedSquare !== square) {
-        const moves = game.moves({ square: selectedSquare, verbose: true });
-        const isValidMove = moves.some((move) => move.to === square);
+        try {
+          // Get all legal moves for the selected piece
+          const moves = game.moves({ square: selectedSquare, verbose: true });
+          const isValidMove = moves.some((move) => move.to === square);
 
-        if (isValidMove) {
-          get().makeMove(selectedSquare, square);
+          if (isValidMove) {
+            get().makeMove(selectedSquare, square);
+          }
+        } catch (error) {
+          console.error('Error checking moves:', error);
         }
       }
       // Clear selection
@@ -147,11 +152,16 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
 
     // If no square is selected and the clicked square has a piece of the correct color
     if (piece && piece.color === turn) {
-      const moves = game.moves({ square, verbose: true });
-      set({
-        selectedSquare: square,
-        validMoves: moves.map((move) => move.to as Square),
-      });
+      try {
+        const moves = game.moves({ square, verbose: true });
+        set({
+          selectedSquare: square,
+          validMoves: moves.map((move) => move.to as Square),
+        });
+      } catch (error) {
+        console.error('Error getting valid moves:', error);
+        set({ selectedSquare: null, validMoves: [] });
+      }
     }
   },
 
@@ -159,9 +169,15 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     const { game, turn, moveHistory, capturedPieces, matchType, ai } = get();
     
     try {
-      const move = game.move({ from, to, promotion: 'q' });
+      // Create a new Chess instance to validate the move
+      const tempGame = new Chess(game.fen());
+      const move = tempGame.move({ from, to, promotion: 'q' });
+
       if (move) {
-        const newHistory = [...moveHistory, `${move.from}${move.to}`];
+        // If move is valid, apply it to the actual game
+        game.move({ from, to, promotion: 'q' });
+        
+        const newHistory = [...moveHistory, `${from}${to}`];
         const newCapturedPieces = { ...capturedPieces };
 
         if (move.captured) {
@@ -173,7 +189,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
           game: new Chess(game.fen()),
           selectedSquare: null,
           validMoves: [],
-          turn: turn === 'w' ? 'b' : 'w',
+          turn: game.turn(),
           moveHistory: newHistory,
           capturedPieces: newCapturedPieces,
           isGameOver: game.isGameOver(),
@@ -183,7 +199,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
         set(newState);
 
         // If it's a computer match and it's black's turn, make AI move
-        if (matchType === 'computer' && !game.isGameOver() && turn === 'w') {
+        if (matchType === 'computer' && !game.isGameOver() && game.turn() === 'b') {
           setTimeout(() => {
             if (ai) {
               ai.updatePosition(game.fen());
@@ -236,10 +252,10 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
   },
 
   acceptUndo: () => {
-    const { game, moveHistory } = get();
+    const { game, moveHistory, matchType } = get();
     if (moveHistory.length > 0) {
       game.undo();
-      if (get().matchType === 'computer') {
+      if (matchType === 'computer') {
         game.undo(); // Undo both player and computer moves
       }
       set({

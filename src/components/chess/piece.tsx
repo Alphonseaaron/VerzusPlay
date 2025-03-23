@@ -9,13 +9,14 @@ interface ChessPieceProps {
   isDraggable?: boolean;
 }
 
+// Updated piece symbols to match the new style
 const PIECE_SYMBOLS: Record<PieceSymbol, string> = {
-  p: '♟',
-  n: '♞',
-  b: '♝',
-  r: '♜',
-  q: '♛',
-  k: '♚',
+  p: '♟︎', // Pawn with more defined shape
+  n: '♞', // Knight with clearer horse head
+  b: '♝', // Bishop with cross top
+  r: '♜', // Rook with castle-like top
+  q: '♛', // Queen with crown design
+  k: '♚', // King with cross top
 };
 
 export function ChessPiece({ id, type, color, isDraggable = false }: ChessPieceProps) {
@@ -39,7 +40,8 @@ export function ChessPiece({ id, type, color, isDraggable = false }: ChessPieceP
       className={cn(
         'flex h-full w-full cursor-grab items-center justify-center text-4xl',
         'select-none transition-transform',
-        color === 'w' ? 'text-white' : 'text-black',
+        // Updated colors to match the image style
+        color === 'w' ? 'text-gray-100 drop-shadow-md' : 'text-gray-800 drop-shadow-sm',
         isDragging && 'scale-110',
         !isDraggable && 'cursor-default'
       )}
