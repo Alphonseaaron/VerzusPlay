@@ -5,8 +5,12 @@ import { Scoreboard } from '../chess/scoreboard';
 import { CheckersBoard } from '../checkers/board';
 import { CheckersControls } from '../checkers/controls';
 import { CheckersScoreboard } from '../checkers/scoreboard';
+import { LudoBoard } from '../ludo/board';
+import { LudoControls } from '../ludo/controls';
+import { LudoScoreboard } from '../ludo/scoreboard';
 import { useGameStore } from '../../lib/store';
 import { useCheckersStore } from '../../lib/checkers';
+import { useLudoStore } from '../../lib/ludo';
 import { useEffect } from 'react';
 
 interface GameContainerProps {
@@ -19,6 +23,7 @@ interface GameContainerProps {
 export function GameContainer({ gameId, mode, type, stake }: GameContainerProps) {
   const initChessGame = useGameStore((state) => state.initGame);
   const initCheckersGame = useCheckersStore((state) => state.initGame);
+  const initLudoGame = useLudoStore((state) => state.initGame);
 
   useEffect(() => {
     switch (gameId) {
@@ -28,8 +33,11 @@ export function GameContainer({ gameId, mode, type, stake }: GameContainerProps)
       case 'checkers':
         initCheckersGame(mode, type, stake);
         break;
+      case 'ludo':
+        initLudoGame(mode, type, stake);
+        break;
     }
-  }, [gameId, mode, type, stake, initChessGame, initCheckersGame]);
+  }, [gameId, mode, type, stake, initChessGame, initCheckersGame, initLudoGame]);
 
   switch (gameId) {
     case 'chess':
@@ -46,6 +54,14 @@ export function GameContainer({ gameId, mode, type, stake }: GameContainerProps)
           <CheckersScoreboard />
           <CheckersBoard />
           <CheckersControls />
+        </>
+      );
+    case 'ludo':
+      return (
+        <>
+          <LudoScoreboard />
+          <LudoBoard />
+          <LudoControls />
         </>
       );
     default:

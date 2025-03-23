@@ -134,7 +134,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       // Try to make a move if the selected square is different
       if (selectedSquare !== square) {
         try {
-          // Get all legal moves for the selected piece
+          // Check if the move is valid
           const moves = game.moves({ square: selectedSquare, verbose: true });
           const isValidMove = moves.some((move) => move.to === square);
 
@@ -153,6 +153,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     // If no square is selected and the clicked square has a piece of the correct color
     if (piece && piece.color === turn) {
       try {
+        // Get all legal moves for the selected piece
         const moves = game.moves({ square, verbose: true });
         set({
           selectedSquare: square,
@@ -169,34 +170,31 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     const { game, turn, moveHistory, capturedPieces, matchType, ai } = get();
     
     try {
-      // Create a new Chess instance to validate the move
-      const tempGame = new Chess(game.fen());
-      const move = tempGame.move({ from, to, promotion: 'q' });
+      // Get the piece that's being captured (if any)
+      const targetSquare = game.get(to);
+      
+      // Make the move
+      const move = game.move({ from, to, promotion: 'q' });
 
       if (move) {
-        // If move is valid, apply it to the actual game
-        game.move({ from, to, promotion: 'q' });
-        
-        const newHistory = [...moveHistory, `${from}${to}`];
-        const newCapturedPieces = { ...capturedPieces };
-
-        if (move.captured) {
+        // Update captured pieces
+        if (targetSquare) {
           const capturedBy = turn === 'w' ? 'white' : 'black';
-          newCapturedPieces[capturedBy].push(move.captured);
+          const newCapturedPieces = { ...capturedPieces };
+          newCapturedPieces[capturedBy].push(targetSquare.type);
+          set({ capturedPieces: newCapturedPieces });
         }
 
-        const newState = {
+        // Update game state
+        set({
           game: new Chess(game.fen()),
           selectedSquare: null,
           validMoves: [],
           turn: game.turn(),
-          moveHistory: newHistory,
-          capturedPieces: newCapturedPieces,
+          moveHistory: [...moveHistory, `${from}${to}`],
           isGameOver: game.isGameOver(),
           winner: game.isCheckmate() ? turn : game.isDraw() ? 'd' : null,
-        };
-
-        set(newState);
+        });
 
         // If it's a computer match and it's black's turn, make AI move
         if (matchType === 'computer' && !game.isGameOver() && game.turn() === 'b') {
