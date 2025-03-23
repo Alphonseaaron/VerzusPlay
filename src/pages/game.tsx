@@ -1,13 +1,10 @@
 import { motion } from 'framer-motion';
 import { HelpCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { ChessBoard } from '../components/chess/board';
-import { GameControls } from '../components/chess/controls';
 import { GameModal } from '../components/chess/game-modal';
-import { Scoreboard } from '../components/chess/scoreboard';
+import { GameContainer } from '../components/games/game-container';
 import { ALL_GAMES } from '../components/game-grid';
-import { useGameStore } from '../lib/store';
 
 export function GamePage() {
   const { id } = useParams();
@@ -18,14 +15,7 @@ export function GamePage() {
   
   const game = ALL_GAMES.find((g) => g.id === id);
   const [showRules, setShowRules] = useState(false);
-  const [showModal, setShowModal] = useState(!type); // Only show modal if no type is selected
-  const initGame = useGameStore((state) => state.initGame);
-
-  useEffect(() => {
-    if (id === 'chess' && type) {
-      initGame(mode || 'demo', type || 'casual', stake);
-    }
-  }, [id, mode, type, stake, initGame]);
+  const [showModal, setShowModal] = useState(!type);
 
   if (!game) {
     return (
@@ -70,18 +60,17 @@ export function GamePage() {
         </motion.div>
       )}
 
-      {id === 'chess' && type && (
-        <>
-          <Scoreboard />
-          <ChessBoard />
-          <GameControls />
-        </>
-      )}
-
-      {id !== 'chess' && (
+      {type ? (
+        <GameContainer 
+          gameId={id || ''} 
+          mode={mode || 'demo'} 
+          type={type} 
+          stake={stake} 
+        />
+      ) : (
         <div className="aspect-[16/9] overflow-hidden rounded-xl bg-white/10 backdrop-blur-xl">
           <div className="flex h-full items-center justify-center">
-            <p className="text-lg text-white/60">Game interface will be loaded here</p>
+            <p className="text-lg text-white/60">Select game mode to start playing</p>
           </div>
         </div>
       )}
